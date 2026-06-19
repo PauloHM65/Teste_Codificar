@@ -19,6 +19,9 @@ public class TicketService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AuditLogService auditLogService;
+
     public List<Ticket> findAll() {
         return ticketRepository.findAll();
     }
@@ -38,7 +41,9 @@ public class TicketService {
                     .orElseThrow(() -> new RuntimeException("Assignee not found"));
             ticket.setAssignee(assignee);
         }
-        return ticketRepository.save(ticket);
+        Ticket savedTicket = ticketRepository.save(ticket);
+        auditLogService.logAction("CRIACAO", "Ticket #" + savedTicket.getId() + " criado com o título: " + savedTicket.getTitle());
+        return savedTicket;
     }
 
     @Transactional
@@ -57,7 +62,16 @@ public class TicketService {
             existing.setAssignee(null);
         }
         
-        return ticketRepository.save(existing);
+        Ticket savedTicket = ticketRepository.save(existing);
+        auditLogService.logAction("EDICAO", "Ticket #" + savedTicket.getId() + " editado. Novo status: " + savedTicket.getStatus());
+        return savedTicket;
+    }
+
+    @Transactional
+    public void deleteTicket(Long id) {
+        Ticket existing = findById(id);
+        ticketRepository.delete(existing);
+        auditLogService.logAction("EXCLUSAO", "Ticket #" + id + " (" + existing.getTitle() + ") foi excluído.");
     }
 
     private User findBestAssignee() {

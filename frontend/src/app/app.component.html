@@ -12,60 +12,65 @@
   </div>
 
   <!-- Form Modal -->
-  <div class="card mb-4 shadow-sm" *ngIf="showForm">
-    <div class="card-header bg-white">
-      <h5 class="mb-0">{{ editingTicket ? 'Editar Chamado' : 'Novo Chamado' }}</h5>
-    </div>
-    <div class="card-body">
-      <form (ngSubmit)="saveTicket()">
-        
-        <div class="mb-3">
-          <label class="form-label">Título</label>
-          <input type="text" class="form-control" name="title" [(ngModel)]="(editingTicket || newTicket).title" required>
+  <div class="modal fade show d-block" tabindex="-1" *ngIf="showForm" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content shadow">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title">{{ editingTicket ? 'Editar Chamado' : 'Novo Chamado' }}</h5>
+          <button type="button" class="btn-close" (click)="closeForm()" aria-label="Close"></button>
         </div>
+        <div class="modal-body">
+          <form (ngSubmit)="saveTicket()">
+            
+            <div class="mb-3">
+              <label class="form-label">Título</label>
+              <input type="text" class="form-control" name="title" [(ngModel)]="(editingTicket || newTicket).title" required>
+            </div>
 
-        <div class="mb-3">
-          <label class="form-label">Descrição</label>
-          <textarea class="form-control" name="description" rows="3" [(ngModel)]="(editingTicket || newTicket).description" required></textarea>
+            <div class="mb-3">
+              <label class="form-label">Descrição</label>
+              <textarea class="form-control" name="description" rows="3" [(ngModel)]="(editingTicket || newTicket).description" required></textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Prioridade</label>
+                <select class="form-select" name="priority" [(ngModel)]="(editingTicket || newTicket).priority" required>
+                  <option value="BAIXA">Baixa</option>
+                  <option value="MEDIA">Média</option>
+                  <option value="ALTA">Alta</option>
+                </select>
+              </div>
+              
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status" [(ngModel)]="(editingTicket || newTicket).status" required>
+                  <option value="ABERTO">Aberto</option>
+                  <option value="EM_ANDAMENTO">Em Andamento</option>
+                  <option value="RESOLVIDO">Resolvido</option>
+                  <option value="FECHADO">Fechado</option>
+                </select>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Responsável</label>
+                <select class="form-select" name="assignee" 
+                        [ngModel]="(editingTicket || newTicket).assignee?.id" 
+                        (ngModelChange)="(editingTicket || newTicket).assignee = {id: $event, name: '', email: ''}">
+                  <option [ngValue]="undefined">Atribuição Automática</option>
+                  <option *ngFor="let user of users" [ngValue]="user.id">{{ user.name }}</option>
+                </select>
+                <small class="text-muted d-block mt-1">Deixe automático para o sistema decidir.</small>
+              </div>
+            </div>
+
+            <div class="modal-footer px-0 pb-0 mt-3 border-top pt-3">
+              <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+              <button type="submit" class="btn btn-success">Salvar</button>
+            </div>
+          </form>
         </div>
-
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <label class="form-label">Prioridade</label>
-            <select class="form-select" name="priority" [(ngModel)]="(editingTicket || newTicket).priority" required>
-              <option value="BAIXA">Baixa</option>
-              <option value="MEDIA">Média</option>
-              <option value="ALTA">Alta</option>
-            </select>
-          </div>
-          
-          <div class="col-md-4 mb-3">
-            <label class="form-label">Status</label>
-            <select class="form-select" name="status" [(ngModel)]="(editingTicket || newTicket).status" required>
-              <option value="ABERTO">Aberto</option>
-              <option value="EM_ANDAMENTO">Em Andamento</option>
-              <option value="RESOLVIDO">Resolvido</option>
-              <option value="FECHADO">Fechado</option>
-            </select>
-          </div>
-
-          <div class="col-md-4 mb-3">
-            <label class="form-label">Responsável</label>
-            <select class="form-select" name="assignee" 
-                    [ngModel]="(editingTicket || newTicket).assignee?.id" 
-                    (ngModelChange)="(editingTicket || newTicket).assignee = {id: $event, name: '', email: ''}">
-              <option [ngValue]="undefined">Atribuição Automática</option>
-              <option *ngFor="let user of users" [ngValue]="user.id">{{ user.name }}</option>
-            </select>
-            <small class="text-muted">A distribuição automática ocorre se mantiver "Atribuição Automática".</small>
-          </div>
-        </div>
-
-        <div class="d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
-          <button type="submit" class="btn btn-success">Salvar</button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 
