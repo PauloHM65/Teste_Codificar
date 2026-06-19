@@ -34,13 +34,14 @@ Foi definido que chamados nos status "ABERTO" e "EM_ANDAMENTO" contam como "não
    ```
 3. Suba os containers usando o docker-compose:
    ```bash
-   docker compose up --build
+   docker-compose up --build
    ```
-   > Observação: A primeira execução demorará um pouco, pois irá baixar as imagens do banco, compilar o backend (via maven no docker) e compilar o frontend (via npm no docker).
+   > Observação: Pode ser necessário usar `sudo docker-compose up --build` dependendo das permissões do seu Docker. A primeira execução demorará um pouco, pois irá baixar as imagens do banco, compilar o backend e compilar o frontend.
 
 4. **Acessar a Aplicação:**
-   - **Frontend:** http://localhost:80
-   - **Backend API:** http://localhost:8080/api/tickets
+   - **Frontend:** http://localhost:4200
+   - **Backend API de Tickets:** http://localhost:8080/api/tickets
+   - **Backend API de Auditoria:** http://localhost:8080/api/audit-logs
 
 ### Banco de Dados
 A criação e população do banco de dados ocorrem de maneira automatizada:
@@ -56,3 +57,12 @@ A criação e população do banco de dados ocorrem de maneira automatizada:
 ## Bibliotecas Externas Adicionais
 - **Lombok:** Para reduzir a verbosidade de getters e setters no Java.
 - **Nginx (Docker):** Para servir o build de produção do Angular de forma leve.
+
+---
+
+## Atualizações Recentes 🚀
+- **Log de Auditoria:** Foi implementada uma tabela no banco de dados (`audit_logs`) que registra automaticamente e de forma segura todas as ações de criação, edição e exclusão de chamados (Tickets). Isso proporciona um rastreamento completo das atividades no sistema, acessível pelo novo endpoint `GET /api/audit-logs`.
+- **Interface Melhorada (Modais):** O formulário de criação e edição de chamados no Angular foi refatorado. Ao invés de empurrar os dados para baixo na tela principal, agora ele abre em modais elegantes (Pop-ups) com um fundo translúcido, deixando a interface mais limpa e fluida.
+- **Ajustes de Infraestrutura:** 
+  - As portas expostas no Docker foram alteradas (Postgres para `5433` e Frontend para `4200`) para evitar conflitos de "Address already in use" com serviços da máquina local.
+  - A inicialização do banco foi ajustada (`spring.jpa.defer-datasource-initialization=true`) garantindo uma comunicação perfeita e sem erros de tabelas inexistentes no boot inicial.
