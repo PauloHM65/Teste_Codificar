@@ -1,0 +1,133 @@
+<nav class="navbar navbar-dark bg-primary shadow-sm mb-4">
+  <div class="container-fluid">
+    <span class="navbar-brand mb-0 h1">Help Desk MVP</span>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- Header / Actions -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Chamados</h2>
+    <button class="btn btn-primary" (click)="openCreateForm()">+ Novo Chamado</button>
+  </div>
+
+  <!-- Form Modal -->
+  <div class="card mb-4 shadow-sm" *ngIf="showForm">
+    <div class="card-header bg-white">
+      <h5 class="mb-0">{{ editingTicket ? 'Editar Chamado' : 'Novo Chamado' }}</h5>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="saveTicket()">
+        
+        <div class="mb-3">
+          <label class="form-label">Título</label>
+          <input type="text" class="form-control" name="title" [(ngModel)]="(editingTicket || newTicket).title" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Descrição</label>
+          <textarea class="form-control" name="description" rows="3" [(ngModel)]="(editingTicket || newTicket).description" required></textarea>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Prioridade</label>
+            <select class="form-select" name="priority" [(ngModel)]="(editingTicket || newTicket).priority" required>
+              <option value="BAIXA">Baixa</option>
+              <option value="MEDIA">Média</option>
+              <option value="ALTA">Alta</option>
+            </select>
+          </div>
+          
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" name="status" [(ngModel)]="(editingTicket || newTicket).status" required>
+              <option value="ABERTO">Aberto</option>
+              <option value="EM_ANDAMENTO">Em Andamento</option>
+              <option value="RESOLVIDO">Resolvido</option>
+              <option value="FECHADO">Fechado</option>
+            </select>
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Responsável</label>
+            <select class="form-select" name="assignee" 
+                    [ngModel]="(editingTicket || newTicket).assignee?.id" 
+                    (ngModelChange)="(editingTicket || newTicket).assignee = {id: $event, name: '', email: ''}">
+              <option [ngValue]="undefined">Atribuição Automática</option>
+              <option *ngFor="let user of users" [ngValue]="user.id">{{ user.name }}</option>
+            </select>
+            <small class="text-muted">A distribuição automática ocorre se mantiver "Atribuição Automática".</small>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+          <button type="submit" class="btn btn-success">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tickets List -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Prioridade</th>
+                <th>Status</th>
+                <th>Responsável</th>
+                <th>Abertura</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let t of tickets">
+                <td>#{{ t.id }}</td>
+                <td>
+                  <strong>{{ t.title }}</strong>
+                  <p class="text-muted small mb-0" style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ t.description }}</p>
+                </td>
+                <td>
+                  <span class="badge" 
+                        [ngClass]="{'bg-success': t.priority === 'BAIXA', 'bg-warning text-dark': t.priority === 'MEDIA', 'bg-danger': t.priority === 'ALTA'}">
+                    {{ t.priority }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" 
+                        [ngClass]="{'bg-primary': t.status === 'ABERTO', 'bg-info text-dark': t.status === 'EM_ANDAMENTO', 'bg-success': t.status === 'RESOLVIDO', 'bg-secondary': t.status === 'FECHADO'}">
+                    {{ t.status.replace('_', ' ') }}
+                  </span>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="bg-secondary rounded-circle text-white d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;" *ngIf="t.assignee">
+                      {{ t.assignee.name.charAt(0) }}
+                    </div>
+                    {{ t.assignee?.name || 'Não atribuído' }}
+                  </div>
+                </td>
+                <td>{{ t.openDate | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary me-2" (click)="openEditForm(t)">Editar</button>
+                  <button class="btn btn-sm btn-outline-success" *ngIf="t.status !== 'RESOLVIDO' && t.status !== 'FECHADO'" (click)="updateTicketStatus(t, 'RESOLVIDO')">Resolver</button>
+                </td>
+              </tr>
+              <tr *ngIf="tickets.length === 0">
+                <td colspan="7" class="text-center py-4 text-muted">
+                  Nenhum chamado encontrado. Clique em "Novo Chamado" para começar.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
